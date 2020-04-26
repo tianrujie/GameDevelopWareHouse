@@ -1,0 +1,3 @@
+pbcopy < ~/.ssh/id_rsa.pub
+
+copy ssh key if exists

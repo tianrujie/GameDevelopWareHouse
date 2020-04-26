@@ -1,0 +1,47 @@
+NativeContainer(本地容器)
+Unity Safety system（安全系统）的缺点之一，每个Job的计算结果是相互隔离的，为了解决这个限制，你需要将Job结果存储在一种共享内存类型NativeContainer。
+
+什么是NativeContainer？
+	NativeContainer是一个对Unity本地内存进行相对安全的封装，接受管理的值类型。在使用Unity JobSystem时，NativeContainer允许job和主线程访问共享内存，而不是通过内存拷贝。
+
+有哪些NativeContainer可以用？
+	Unity提供了一个NativeContainer叫做NativeArray，你可以通过NativeSlice操作NativeArray从特定位置开始固定长度的数据子集
+
+	注意：Unity ECS系统拓展了Unity.Collection命名空间下的NativeContainer类型：
+		*	NativeList - 可变长度的NativeArray
+		*	NativeHashMap - 键值对
+		*	NativeMultiHashMap - 一键多值的哈希表
+		*	NativeQueue	- 先入先出列表
+
+NativeContainer和Safety System之间的关系
+
+SF是在所有NativeContainer类型中内置的，它追踪了是谁在读写NativeContainer。
+注意：
+	所有NativeContainer的安全类型检查（如：越界检查、释放检查、类型检查），都只在Editor和PlayMode下有效。
+
+SF中的一部分DisposeSentinel和AtomicSafetyHandle
+
+*	DisposeSentinel可能会在内存泄露后很久，才会触发并给出内存泄漏的错误日志
+
+*	在代码中使用AtomicSafetyHandle移交NativeContainer的权限， 比如：如果两个Job同时写入NativeArray，SF在你调度Job的时候就会抛出清晰的异常日志来告诉你怎么去解决这个问题。因此你可以根据Job的依赖关系来调度，在第一个job完成nativeContainer的写入之后，第二个Job可以安全的读写同一个NativeCondition，当然主线程读写的时候一样需要严格限制。SF也允许多个并行Job的读取同一个数据。
+
+一个Job在默认情况下拥有NativeContainer的读写权限，这有可能会拖累性能表现，C# 的SF不允许一个Job在另一个Job写入数据的时候拥有写入权限，如果不需要写入权限，可以在NativeContainer上添加[ReadOnly]标签，比如：
+	[ReadOnly]
+	public NativeArray<int> input;
+这样其他Job就可以在当前job执行的时候，获得NativeArray的只读权限
+
+注意：在访问静态数据的时候是不会有SF的安全保护的，静态数据绕过了所有的SF，因此可能导致Unity崩溃。
+
+
+NativeContainer 分配
+
+当创建一个NativeContainer的时候，需要指定内存分配的类型，这个类型取决于Job的存在时间，让你在不同的情况下去制定最优的策略来保证性能表现。
+
+有三种内存分配和释放的类型，你需要在初始化NativeContainer的时候，指定适当的类型
+
+*	Allocator.Temp 分配速度最快，试用于生命周期在一帧以内的job，你需要在方法结束之前调用Dispose方法
+*	Allocator.TempJob 分配速度比Temp慢，但是比Persistent快，适用于生命周期在四帧以内的Job，是线程安全的，如果你没有手动调用Dispose方法，会在四帧之后输出一条警告日志，大部分小Job会采用这种类型
+
+*	Allocator.Persistent 分配速递最慢，但是可以存在任意长的时间，必要的话可以贯穿整个应用的生命周期。本质上是malloc的直接封装，其他更长的Job可以用这种类型，当然性能有压力的时候，还是不要使用
+
+

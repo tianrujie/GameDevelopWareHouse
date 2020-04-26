@@ -1,0 +1,60 @@
+Unity ECS
+	*	NativeContainer -> NativeArray
+	*	C# Job System 多线程
+		*	burst compiler
+			*	Burst是一个编译器，它使用LLVM将IL / .NET字节码转换为高度优化的本机代码。它作为Unity包发布，并使用Unity Package 			Manager集成到Unity中
+			
+			*	Burst主要用于与Job系统高效协作。
+		
+			https://blog.csdn.net/alph258/article/details/83997917
+
+
+
+		*	LLVM （Low Level Virtual Machine）
+
+			*	LLVM是一个自由软件项目，它是一种编译器基础设施，以C++写成，包含一系列模块化的编译器组件和工具链，用来开发编译器前端和后端。
+			
+			*	LLVM提供了完整编译系统的中间层，它会将中间语言（Intermediate Representation，IR）从编译器取出与最优化，最优化后的IR接着	 被转换及链接到目标平台的汇编语言。LLVM可以接受来自GCC工具链所编译的IR，包含它底下现存的编译器。
+			
+			*	LLVM也可以在编译时期、链接时期，甚至是运行时期产生可重新定位的代码（Relocatable Code）
+
+			https://zh.wikipedia.org/wiki/LLVM
+
+		*	ArcheType & Chunk & Entity Manager
+
+			https://medium.com/@icex33/how-to-not-loop-over-all-entities-in-unity-ecs-f17ecb50d054
+
+		*	Unity Burst
+			https://docs.unity3d.com/Packages/com.unity.burst@1.3/manual/index.html
+
+			ECS
+			https://docs.unity3d.com/Packages/com.unity.entities@0.9/manual/index.html
+
+			Jobs
+			https://docs.unity3d.com/Manual/JobSystem.html
+
+			Unity.Mathematics
+			https://docs.unity3d.com/Packages/com.unity.mathematics@1.1/manual/index.html
+
+
+
+TODO：
+
+*	Unity Shadow Mask、AO，GI
+		
+*	Addressable system
+
+*	ECS continuing
+
+*	ConmandBuffer
+
+*	群聚算法
+
+*	A*网格寻路算法，优化算法
+
+*	帧同步和状态同步技术
+
+*	MOBA单机demo->多人demo
+
+
+
